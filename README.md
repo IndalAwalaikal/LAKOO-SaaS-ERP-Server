@@ -118,4 +118,4 @@ Thank you for visiting the Lakoo SaaS Server repository! Building a reliable bac
 
 If you find this project valuable, please consider giving it a star! ⭐ We welcome any issues, feature requests, or pull requests to make Lakoo even better.
 
-*Built with ❤️ by the Lakoo Engineering Team.*
+*Developed with ❤️ by **Indal Awalaikal**.*
