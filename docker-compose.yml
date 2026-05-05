@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  # 1. Go API Backend
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT:-8080}:8080"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+      - MINIO_ENDPOINT=minio:9000
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    networks:
+      - lakoo-network
+
+  # 2. Python AI Service
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    ports:
+      - "${AI_SERVICE_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - lakoo-network
+
+  # 3. React/Vite Frontend
+  client:
+    build:
+      context: ../client
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:${API_PORT:-8080}/api/v1
+        - VITE_AI_BASE_URL=http://localhost:${AI_SERVICE_PORT:-8000}
+    ports:
+      - "${FRONTEND_PORT:-5174}:80"
+    depends_on:
+      - api
+      - ai-service
+    networks:
+      - lakoo-network
+
+  # 4. MySQL Database Core
+  mysql:
+    image: mysql:8.0
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lakoo-network
+
+  # 5. Redis Session/Cache Node
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_data:/data
+    networks:
+      - lakoo-network
+
+  # 6. MinIO File Storage Server
+  minio:
+    image: minio/minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file:
+      - .env
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./minio_data:/data
+    networks:
+      - lakoo-network
+
+networks:
+  lakoo-network:
+    driver: bridge
