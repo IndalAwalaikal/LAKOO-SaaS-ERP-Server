@@ -1,0 +1,2 @@
+ALTER TABLE products MODIFY COLUMN image_url TEXT;
+ALTER TABLE tenants MODIFY COLUMN logo_url TEXT;
