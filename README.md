@@ -1,21 +1,23 @@
-# Lakoo SaaS - Server Ecosystem
+# Lakoo SaaS - Server Ecosystem ⚙️
 
-Lakoo SaaS Server is the backend infrastructure for a sophisticated, multi-tenant Enterprise Resource Planning (ERP) platform designed for Small and Medium Enterprises (SMEs). The system employs a distributed micro-architecture pattern, ensuring high availability, robust security, and fault isolation between the core ERP transaction logic and the data-intensive AI analytics services.
-
-## System Architecture
-
-The backend consists of two primary services that coordinate with several data layers:
-
-1. **Golang Core API**: The primary engine handling authentication, Role-Based Access Control (RBAC), multi-tenant CRUD operations, and external storage communication.
-2. **Python AI Service**: A specialized Fast API service that consumes transaction data to generate demand projections and statistical sales insights.
-3. **Data Layer**:
-   - **MySQL (Relational)**: Stores transactional entities, isolated by tenant.
-   - **Redis (Cache/Session)**: Manages volatile sessions and rate-limiting.
-   - **MinIO (Object Storage)**: S3-compatible storage for binary assets (Logos, QRIS images).
+Lakoo SaaS Server is the robust backend infrastructure for a sophisticated, multi-tenant Enterprise Resource Planning (ERP) platform designed for Small and Medium Enterprises (SMEs). The system employs a distributed micro-architecture pattern, ensuring high availability, bulletproof security, and fault isolation between the core ERP transaction logic and the data-intensive AI analytics services.
 
 ---
 
-## Tech Stack
+## 🏛️ System Architecture
+
+The backend consists of two primary services that coordinate with several highly-optimized data layers:
+
+1. **Golang Core API**: The primary engine handling authentication, Role-Based Access Control (RBAC), multi-tenant CRUD operations, and external storage communication. Built using Domain-Driven Design (DDD) principles.
+2. **Python AI Service**: A specialized Fast API microservice that consumes transaction data to generate demand projections and statistical sales insights using Pandas.
+3. **Data Layer**:
+   - **MySQL 8.0 (Relational)**: Stores transactional entities, isolated strictly by tenant ID.
+   - **Redis 7.0 (Cache/Session)**: Manages volatile sessions, rate-limiting, and high-speed data caching.
+   - **MinIO (Object Storage)**: S3-compatible, self-hosted storage for binary assets (Logos, Receipts, QRIS images).
+
+---
+
+## 🛠️ Tech Stack
 
 | Component | Technology | Description |
 | :--- | :--- | :--- |
@@ -29,7 +31,7 @@ The backend consists of two primary services that coordinate with several data l
 
 ---
 
-## Directory Structure
+## 📂 Directory Structure
 
 ```text
 server/
@@ -57,7 +59,7 @@ server/
 
 ---
 
-## Security and Hardening Specifications
+## 🛡️ Security and Hardening Specifications
 
 ### **Brute-force Mitigation**
 Powered by a Redis-based Rate Limiter. Attempts to access the authentication endpoints are tracked by IP and Email identity. 
@@ -78,23 +80,42 @@ The following headers are injected into every API response via `SecurityMiddlewa
 
 ---
 
-## Getting Started (Docker Installation)
+## 🚀 Getting Started (Docker Installation)
 
-The easiest way to run the entire backend infrastructure is through Docker Compose.
+The absolute easiest way to run the entire backend infrastructure is through Docker Compose. This ensures you do not have to manually configure MySQL, Redis, or MinIO.
 
 ### Prerequisites
-- Docker
+- Docker Engine
 - Docker Compose
 
 ### Running the Services
 1. Copy `.env.example` to `.env` and fill in the required passwords and secrets.
-2. Build and start the infrastructure:
+   ```bash
+   cp .env.example .env
+   ```
+2. Build and start the infrastructure in detached mode:
    ```bash
    docker-compose up -d --build
    ```
-3. The following services will be available:
+3. Verify that the services are running. The following endpoints will be available:
    - **Core API**: `http://localhost:8080`
    - **AI-Service**: `http://localhost:8000`
    - **MySQL**: `localhost:3306` (mapped to `3307` externally if configured)
    - **MinIO Console**: `http://localhost:9001`
    - **Redis**: `localhost:6379`
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License**. You are free to use, modify, and distribute this software in compliance with the license terms.
+
+---
+
+## ✨ Closing Words & Acknowledgements
+
+Thank you for visiting the Lakoo SaaS Server repository! Building a reliable backend is no easy feat, but we designed this architecture to be as scalable and secure as possible for enterprise use. We hope this codebase serves as a solid foundation for your operations or as a learning resource for implementing Clean Architecture in Golang alongside AI microservices.
+
+If you find this project valuable, please consider giving it a star! ⭐ We welcome any issues, feature requests, or pull requests to make Lakoo even better.
+
+*Built with ❤️ by the Lakoo Engineering Team.*
