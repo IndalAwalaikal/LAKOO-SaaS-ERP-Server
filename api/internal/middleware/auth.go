@@ -42,14 +42,6 @@ func AuthMiddleware(cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		// Hardening: Cross-verify token tenant with current subdomain intent
-		resolvedID, exists := c.Get("resolved_tenant_id")
-		if exists && resolvedID.(string) != claims.TenantID {
-			response.Error(c, 403, "FORBIDDEN", "Mismatched session: Token data does not match the current subdomain tenant space.")
-			c.Abort()
-			return
-		}
-
 		c.Set("user_id", claims.UserID)
 		c.Set("tenant_id", claims.TenantID)
 		c.Set("role", claims.Role)

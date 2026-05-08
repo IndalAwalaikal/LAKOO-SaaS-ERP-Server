@@ -11,8 +11,8 @@ import (
 )
 
 type ProductService interface {
-	CreateProduct(tenantID string, req *dto.ProductRequest) (*domain.Product, error)
-	UpdateProduct(id, tenantID string, req *dto.ProductRequest) (*domain.Product, error)
+	CreateProduct(tenantID, userID string, req *dto.ProductRequest) (*domain.Product, error)
+	UpdateProduct(id, tenantID, userID string, req *dto.ProductRequest) (*domain.Product, error)
 	DeleteProduct(id, tenantID string) error
 	GetProducts(tenantID string) ([]domain.Product, error)
 	GetProductByID(id, tenantID string) (*domain.Product, error)
@@ -27,7 +27,7 @@ func NewProductService(repo repository.ProductRepository, fr repository.FinanceR
 	return &productService{repo: repo, financeRepo: fr}
 }
 
-func (u *productService) CreateProduct(tenantID string, req *dto.ProductRequest) (*domain.Product, error) {
+func (u *productService) CreateProduct(tenantID, userID string, req *dto.ProductRequest) (*domain.Product, error) {
 	now := time.Now()
 	isActive := true
 	if req.IsActive != nil {
@@ -67,6 +67,7 @@ func (u *productService) CreateProduct(tenantID string, req *dto.ProductRequest)
 			Description: "Pengeluaran stok awal saat pendaftaran produk: " + product.Name,
 			Date:        now,
 			ReferenceID: product.ID,
+			CreatedBy:   userID,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		}
@@ -76,7 +77,7 @@ func (u *productService) CreateProduct(tenantID string, req *dto.ProductRequest)
 	return product, nil
 }
 
-func (u *productService) UpdateProduct(id, tenantID string, req *dto.ProductRequest) (*domain.Product, error) {
+func (u *productService) UpdateProduct(id, tenantID, userID string, req *dto.ProductRequest) (*domain.Product, error) {
 	existing, err := u.repo.FindByID(id, tenantID)
 	if err != nil {
 		return nil, err
@@ -121,6 +122,7 @@ func (u *productService) UpdateProduct(id, tenantID string, req *dto.ProductRequ
 			Description: "Penambahan stok produk via update: " + existing.Name,
 			Date:        now,
 			ReferenceID: existing.ID,
+			CreatedBy:   userID,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		}

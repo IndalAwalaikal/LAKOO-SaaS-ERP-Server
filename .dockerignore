@@ -1,0 +1,27 @@
+# Databases & Data
+mysql_data/
+redis_data/
+minio_data/
+*.db
+
+# Build Binaries & Packages
+lakoo-api
+api/lakoo-api
+.venv/
+ai-service/.venv/
+venv/
+ai-service/venv/
+ai-service/__pycache__/
+node_modules/
+dist/
+bin/
+
+# Git & IDE
+.git/
+.vscode/
+.idea/
+.DS_Store
+
+# Environment Variables
+.env
+.env.local

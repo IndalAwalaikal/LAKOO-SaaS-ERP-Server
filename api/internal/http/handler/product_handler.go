@@ -29,7 +29,9 @@ func (h *ProductHandler) Create(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.CreateProduct(tenantID.(string), &req)
+	userID, _ := c.Get("user_id")
+
+	res, err := h.service.CreateProduct(tenantID.(string), userID.(string), &req)
 	if err != nil {
 		log.Printf("[ProductHandler] Create Error for Tenant %s: %v", tenantID.(string), err)
 		response.Error(c, 422, "DATABASE_ERROR", "Gagal menyimpan produk: "+err.Error())
@@ -49,7 +51,9 @@ func (h *ProductHandler) Update(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.UpdateProduct(id, tenantID.(string), &req)
+	userID, _ := c.Get("user_id")
+
+	res, err := h.service.UpdateProduct(id, tenantID.(string), userID.(string), &req)
 	if err != nil {
 		if err.Error() == "product not found" {
 			response.Error(c, 404, "NOT_FOUND", "Product not found")

@@ -11,26 +11,32 @@ import (
 )
 
 func NewMySQLConnection(cfg *config.Config) *sqlx.DB {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true&loc=Local",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Local&multiStatements=true",
 		cfg.DBUser,
 		cfg.DBPassword,
 		cfg.DBHost,
+		cfg.DBPort,
 		cfg.DBName,
 	)
 
-	db, err := sqlx.Connect("mysql", dsn)
-	if err != nil {
-		log.Fatalf("Failed to connect to MySQL: %v", err)
+	var db *sqlx.DB
+	var err error
+
+	// Retry logic for DB connection
+	for i := 0; i < 10; i++ {
+		db, err = sqlx.Connect("mysql", dsn)
+		if err == nil {
+			err = db.Ping()
+			if err == nil {
+				break
+			}
+		}
+		log.Printf("Failed to connect to MySQL (attempt %d/10): %v. Retrying in 5s...", i+1, err)
+		time.Sleep(5 * time.Second)
 	}
 
-	// Optimize connection pooling
-	db.SetMaxOpenConns(100)
-	db.SetMaxIdleConns(10)
-	db.SetConnMaxLifetime(time.Hour)
-
-	err = db.Ping()
 	if err != nil {
-		log.Fatalf("Failed to ping MySQL: %v", err)
+		log.Fatalf("Could not connect to MySQL after 10 attempts: %v", err)
 	}
 
 	log.Println("Connected to MySQL successfully")

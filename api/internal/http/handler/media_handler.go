@@ -11,11 +11,11 @@ import (
 )
 
 type MediaHandler struct {
-	minioService storage.MinioService
+	storageService storage.StorageService
 }
 
-func NewMediaHandler(ms storage.MinioService) *MediaHandler {
-	return &MediaHandler{minioService: ms}
+func NewMediaHandler(ms storage.StorageService) *MediaHandler {
+	return &MediaHandler{storageService: ms}
 }
 
 func (h *MediaHandler) Upload(c *gin.Context) {
@@ -70,13 +70,19 @@ func (h *MediaHandler) Upload(c *gin.Context) {
 		return
 	}
 
-	// Generate secure filename
+	// Generate secure filename within category folder
 	ext := filepath.Ext(file.Filename)
-	uniqueName := tenantID.(string) + "/media/" + uuid.New().String() + ext
+	folder := c.Query("folder")
+	if folder == "" {
+		folder = "misc"
+	}
+	
+	// Format: {tenantID}/{folder}/{uuid}.ext
+	uniqueName := filepath.Join(tenantID.(string), folder, uuid.New().String()+ext)
 
-	objectURL, err := h.minioService.UploadFile(c.Request.Context(), uniqueName, src, file.Size, detectedType)
+	objectURL, err := h.storageService.UploadFile(c.Request.Context(), uniqueName, src, file.Size, detectedType)
 	if err != nil {
-		response.Error(c, 500, "INTERNAL_ERROR", "Failed to upload file: " + err.Error())
+		response.Error(c, 500, "INTERNAL_ERROR", "Failed to upload file: "+err.Error())
 		return
 	}
 

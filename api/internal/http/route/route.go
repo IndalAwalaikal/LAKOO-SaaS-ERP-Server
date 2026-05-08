@@ -30,11 +30,10 @@ func RegisterRoutes(p RouterParams) {
 	// Global Middlewares
 	p.Engine.Use(middleware.CORSMiddleware())
 	p.Engine.Use(middleware.SecurityMiddleware())
-	p.Engine.Use(middleware.TenantResolver(p.TenantRepo))
 	
 	v1 := p.Engine.Group("/api/v1")
 	
-	// Open Routes
+	// Open Routes (Bypass TenantResolver for registration/login)
 	v1.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "up", "service": "api"})
 	})
@@ -48,7 +47,7 @@ func RegisterRoutes(p RouterParams) {
 		auth.POST("/logout", p.TenantHandler.Logout)
 	}
 
-	// Protected Routes
+	// Protected Routes (Require Auth & Tenant context)
 	protected := v1.Group("/")
 	protected.Use(middleware.AuthMiddleware(p.Config))
 	{

@@ -20,10 +20,14 @@ func main() {
 
 	// 2. Initialize Database Connections
 	db := database.NewMySQLConnection(cfg)
+	defer db.Close()
+
+	// Run Auto Migrations
+	database.RunMigrations(db)
 	redisClient := database.NewRedisClient(cfg)
 
-	// 3. Initialize MinIO / Storage
-	minioSvc := storage.NewMinioService(cfg.MinioEndpoint, cfg.MinioAccessKey, cfg.MinioSecretKey, cfg.MinioBucket, cfg.MinioUseSSL)
+	// 3. Initialize Local Storage
+	localSvc := storage.NewLocalStorage(cfg.StoragePath)
 
 	// 4. Initialize Repositories
 	tenantRepo := repository.NewTenantRepository(db)
@@ -51,10 +55,13 @@ func main() {
 	inventoryHnd := handler.NewInventoryHandler(inventoryService)
 	financeHnd := handler.NewFinanceHandler(financeService)
 	notificationHnd := handler.NewNotificationHandler(notificationService)
-	mediaHnd := handler.NewMediaHandler(minioSvc)
+	mediaHnd := handler.NewMediaHandler(localSvc)
 
 	// 7. Setup Gin Router
 	r := gin.Default()
+	
+	// Serve static files from storage directory
+	r.Static("/storage", cfg.StoragePath)
 	
 	// 8. Register Routes securely in delivery layer
 	route.RegisterRoutes(route.RouterParams{

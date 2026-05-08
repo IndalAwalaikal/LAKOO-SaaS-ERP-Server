@@ -43,7 +43,7 @@ func (u *inventoryService) AdjustStock(tenantID, userID string, req *dto.Invento
 	}
 
 	// Record automated expense if addition
-	if req.MutationType == "addition" {
+	if req.MutationType == "in" {
 		product, err := u.productRepo.FindByID(req.ProductID, tenantID)
 		if err == nil && product != nil {
 			exp := &domain.FinanceTransaction{
@@ -55,6 +55,7 @@ func (u *inventoryService) AdjustStock(tenantID, userID string, req *dto.Invento
 				Description: "Pembelian stok baru via manajemen inventori: " + product.Name,
 				Date:        time.Now(),
 				ReferenceID: mut.ID,
+				CreatedBy:   userID,
 				CreatedAt:   time.Now(),
 				UpdatedAt:   time.Now(),
 			}
